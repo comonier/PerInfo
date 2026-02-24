@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Item;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import net.md_5.bungee.api.chat.ItemTag;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -42,7 +43,7 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
     private FileConfiguration messages;
     private String lang;
     private static Economy econ = null;
-    private final Map<String, Inventory> snapshotCache = new HashMap<>();
+    private final Map snapshotCache = new HashMap();
 
     @Override
     public void onEnable() {
@@ -58,7 +59,7 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getScheduler().runTaskTimer(this, snapshotCache::clear, 12000L, 12000L);
         
-        getLogger().info("PerInfo v1.1 - Build Sem Erros de Comparador!");
+        getLogger().info("PerInfo v1.1 - Sistema de Hover 1.21.1 Ativado!");
     }
 
     private void registerCommand(String name) {
@@ -71,8 +72,8 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
 
     private void setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) return;
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp != null) econ = rsp.getProvider();
+        RegisteredServiceProvider rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp != null) econ = (Economy) rsp.getProvider();
     }
 
     public void loadMessages() {
@@ -108,10 +109,11 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
             }
 
             if (args[0].equalsIgnoreCase("view") && args.length >= 2) {
-                if (!(sender instanceof Player player)) return true;
-                if (snapshotCache.containsKey(args[1])) {
-                    player.openInventory(snapshotCache.get(args[1]));
-                    player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1f, 1f);
+                if (sender instanceof Player player) {
+                    if (snapshotCache.containsKey(args[1])) {
+                        player.openInventory((Inventory) snapshotCache.get(args[1]));
+                        player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1f, 1f);
+                    }
                 }
                 return true;
             }
@@ -123,12 +125,13 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
                     return true;
                 }
                 sender.sendMessage(getMsg("list-header").replace("{plugin}", target.getName()));
-                Map<String, Map<String, Object>> cmds = target.getDescription().getCommands();
+                Map cmds = target.getDescription().getCommands();
                 if (cmds != null) {
-                    for (String cName : cmds.keySet()) {
-                        Object pObj = cmds.get(cName).get("permission");
-                        if (sender instanceof Player p) sendClickableMessage(p, ChatColor.YELLOW + "/" + cName + ChatColor.WHITE + " - ", (pObj != null ? pObj.toString() : getMsg("not-defined")));
-                    }
+                    cmds.forEach((k, v) -> {
+                        Map details = (Map) v;
+                        Object pObj = details.get("permission");
+                        if (sender instanceof Player p) sendClickableMessage(p, ChatColor.YELLOW + "/" + k + ChatColor.WHITE + " - ", (pObj != null ? pObj.toString() : getMsg("not-defined")));
+                    });
                 }
                 return true;
             }
@@ -138,17 +141,18 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
         }
 
         if (cmd.getName().equalsIgnoreCase("iinfo")) {
-            if (!(sender instanceof Player player)) return true;
-            if (!hasPerm(player, "iinfo", "perinfo.iinfo")) {
-                player.sendMessage(getMsg("no-permission"));
-                return true;
+            if (sender instanceof Player player) {
+                if (hasPerm(player, "iinfo", "perinfo.iinfo") == false) {
+                    player.sendMessage(getMsg("no-permission"));
+                    return true;
+                }
+                ItemStack item = player.getInventory().getItemInMainHand();
+                if (item == null || item.getType() == Material.AIR) {
+                    player.sendMessage(getMsg("item-empty"));
+                    return true;
+                }
+                handleIInfo(player, item);
             }
-            ItemStack item = player.getInventory().getItemInMainHand();
-            if (item == null || item.getType() == Material.AIR) {
-                player.sendMessage(getMsg("item-empty"));
-                return true;
-            }
-            handleIInfo(player, item);
             return true;
         }
 
@@ -167,14 +171,11 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
     private void handleCommandSearch(CommandSender sender, String cmdName) {
         String search = cmdName.startsWith("/") ? cmdName : "/" + cmdName;
         HelpTopic topic = Bukkit.getHelpMap().getHelpTopic(search);
-
         if (topic == null) {
             sender.sendMessage(getMsg("command-not-found").replace("{name}", cmdName));
             return;
         }
-
         PluginCommand pCmd = Bukkit.getPluginCommand(cmdName.replace("/", ""));
-        
         if (pCmd != null) {
             sender.sendMessage(getMsg("plugin-info").replace("{plugin}", pCmd.getPlugin().getName()));
             sender.sendMessage(getMsg("version-info").replace("{version}", pCmd.getPlugin().getDescription().getVersion()));
@@ -187,17 +188,19 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
-        if (!msg.contains("@")) return;
-
+        if (msg.contains("@") == false) return;
         Player player = event.getPlayer();
-        if (!hasPerm(player, "chat-symbols", "perinfo.chat")) return;
+        if (hasPerm(player, "chat-symbols", "perinfo.chat") == false) return;
 
         event.setCancelled(true);
-        String format = event.getFormat().replace("%1$s", player.getDisplayName()).replace("%2$s", "");
-        TextComponent finalMsg = new TextComponent(TextComponent.fromLegacyText(format));
+        String rawFormat = event.getFormat();
+        if (rawFormat == null || rawFormat.contains("%1$s") == false) rawFormat = "<%1$s> %2$s";
+        
+        String header = String.format(rawFormat, player.getDisplayName(), "");
+        TextComponent finalMsg = new TextComponent(TextComponent.fromLegacyText(header));
         String[] words = msg.split(" ");
 
         for (int i = 0; i < words.length; i++) {
@@ -211,18 +214,39 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
             } else if (w.equalsIgnoreCase("@playtime")) {
                 int t = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
                 finalMsg.addExtra(new TextComponent(ChatColor.AQUA + getMsg("time-format").replace("{h}", String.valueOf(t/72000)).replace("{m}", String.valueOf((t%72000)/1200))));
-            } else finalMsg.addExtra(new TextComponent(w));
+            } else finalMsg.addExtra(new TextComponent(TextComponent.fromLegacyText(w)));
             
-            if (i < (words.length - 1)) finalMsg.addExtra(" ");
+            if (i != words.length - 1) finalMsg.addExtra(" ");
         }
         for (Player online : Bukkit.getOnlinePlayers()) online.spigot().sendMessage(finalMsg);
+        Bukkit.getConsoleSender().sendMessage(player.getName() + ": " + msg);
     }
 
     private TextComponent createItemComponent(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) return new TextComponent(ChatColor.RED + "[Vazio]");
-        String name = (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) ? item.getItemMeta().getDisplayName() : item.getType().name();
+        
+        ItemMeta meta = item.getItemMeta();
+        String name = (meta != null && meta.hasDisplayName()) ? meta.getDisplayName() : item.getType().name().replace("_", " ").toLowerCase();
         TextComponent c = new TextComponent(ChatColor.AQUA + "[" + name + ChatColor.AQUA + "]");
-        c.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new Item(item.getType().getKey().toString(), item.getAmount(), null)));
+        
+        if (meta != null) {
+            // Se houver encantos, listamos no hover de texto (SHOW_TEXT) para garantir visibilidade na 1.21.1
+            if (meta.hasEnchants()) {
+                StringBuilder sb = new StringBuilder(ChatColor.YELLOW + name + "\n");
+                meta.getEnchants().forEach((en, lvl) -> {
+                    sb.append(ChatColor.GRAY + " - " + en.getKey().getKey() + " " + lvl + "\n");
+                });
+                c.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(sb.toString())));
+                return c;
+            }
+        }
+        
+        // Se for um item comum sem encantos, enviamos o SHOW_ITEM padrão
+        try {
+            c.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new Item(item.getType().getKey().toString(), item.getAmount(), ItemTag.ofNbt("{}"))));
+        } catch (Exception e) {
+            c.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.YELLOW + name)));
+        }
         return c;
     }
 
@@ -232,7 +256,6 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
         Inventory gui = Bukkit.createInventory(null, ec ? 27 : 45, title);
         gui.setContents(ec ? p.getEnderChest().getContents() : p.getInventory().getContents());
         snapshotCache.put(id, gui);
-        
         TextComponent c = new TextComponent((ec ? ChatColor.LIGHT_PURPLE : ChatColor.GREEN) + (ec ? "[EnderChest]" : "[Inventory]"));
         c.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.YELLOW + "Clique para ver de " + p.getName())));
         c.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/perinfo view " + id));
@@ -241,9 +264,7 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
 
     @EventHandler
     public void onInvClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().contains("Inv: ") || event.getView().getTitle().contains("EnderChest: ")) {
-            event.setCancelled(true);
-        }
+        if (event.getView().getTitle().contains("Inv: ") || event.getView().getTitle().contains("EnderChest: ")) event.setCancelled(true);
     }
 
     private void handleIInfo(Player player, ItemStack item) {
@@ -252,7 +273,7 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
         sendClickableMessage(player, getMsg("item-id").replace("{id}", ""), item.getType().getKey().toString());
         if (meta != null) {
             if (meta.hasCustomModelData()) player.sendMessage(getMsg("item-model").replace("{data}", String.valueOf(meta.getCustomModelData())));
-            if (!meta.getEnchants().isEmpty()) {
+            if (meta.getEnchants().isEmpty() == false) {
                 String enchants = meta.getEnchants().entrySet().stream().map(e -> e.getKey().getKey().getKey() + ":" + e.getValue()).collect(Collectors.joining(", "));
                 player.sendMessage(getMsg("item-enchants").replace("{list}", enchants));
             }
@@ -263,20 +284,15 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
     private void sendPluginInfo(CommandSender sender) {
         sender.sendMessage(ChatColor.AQUA + "=== PerInfo v1.1 ===");
         sender.sendMessage(ChatColor.GRAY + "Desenvolvido por: " + ChatColor.WHITE + "Comonier");
-        
         if (sender instanceof Player player) {
-            player.spigot().sendMessage(createLink(" [Release] ", "https://github.com/comonier/PerInfo/releases", ChatColor.GREEN));
-            player.spigot().sendMessage(createLink(" [Source] ", "https://github.com/comonier/PerInfo", ChatColor.YELLOW));
-            player.spigot().sendMessage(createLink(" [Discord] ", "https://discord.gg/kqgDEGGMAs", ChatColor.BLUE));
+            player.spigot().sendMessage(createLink(" [Release] ", "https://github.com", ChatColor.GREEN));
+            player.spigot().sendMessage(createLink(" [Source] ", "https://github.com", ChatColor.YELLOW));
+            player.spigot().sendMessage(createLink(" [Discord] ", "https://discord.gg", ChatColor.BLUE));
         }
-
-        sender.sendMessage("");
-        sender.sendMessage(ChatColor.YELLOW + "Comandos do Plugin:");
-        this.getDescription().getCommands().forEach((name, map) -> {
-            sender.sendMessage(ChatColor.GOLD + "/" + name + ChatColor.GRAY + " - " + ChatColor.WHITE + map.get("description"));
+        this.getDescription().getCommands().forEach((n, m) -> {
+            Map details = (Map) m;
+            sender.sendMessage(ChatColor.GOLD + "/" + n + ChatColor.GRAY + " - " + ChatColor.WHITE + details.get("description"));
         });
-        
-        sender.sendMessage("");
         sender.sendMessage(getMsg("usage"));
     }
 
@@ -298,18 +314,17 @@ public class PerInfo extends JavaPlugin implements Listener, CommandExecutor, Ta
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender s, Command c, String a, String[] args) {
+    public List onTabComplete(CommandSender s, Command c, String a, String[] args) {
         if (c.getName().equalsIgnoreCase("perinfo")) {
-            // Lógica sem operador de comparação no loop
             if (args.length == 1) {
-                List<String> list = new ArrayList<>(Arrays.asList("list", "reload", "view"));
+                List list = new ArrayList(Arrays.asList("list", "reload", "view"));
                 for (HelpTopic topic : Bukkit.getHelpMap().getHelpTopics()) {
                     String name = topic.getName();
                     if (name.startsWith("/")) list.add(name.substring(1));
                 }
-                return StringUtil.copyPartialMatches(args[0], list, new ArrayList<String>());
+                return StringUtil.copyPartialMatches(args[0], list, new ArrayList());
             }
         }
-        return new ArrayList<String>();
+        return new ArrayList();
     }
 }

@@ -1,26 +1,30 @@
 name: PerInfo
-version: '1.0'
+version: '1.1'
 main: com.comonier.perinfo.PerInfo
 api-version: '1.21'
 description: Utility for permissions, item inspection, and chat symbols.
 author: Comonier
-softdepend: [Vault]
+# Garantindo que o VentureChat não sobre-escreva as permissões
+softdepend: [Vault, VentureChat]
 
 commands:
   perinfo:
-    description: "Main command, shows plugin info and developers."
+    description: "Main command for permissions and plugin info."
     usage: "/perinfo <command|list|reload>"
   iinfo:
     description: "Shows technical details of the item in hand."
     usage: "/iinfo"
   simbolos:
-    description: "Shows a tutorial for using @ symbols in chat."
+    description: "Tutorial for using @ symbols in chat."
     usage: "/simbolos"
 
 permissions:
   perinfo.use:
-    description: "Allows searching for command permissions."
+    description: "Allows command and permission lookups."
+    default: op
   perinfo.iinfo:
-    description: "Allows detailed item inspection."
+    description: "Allows item inspection."
+    default: op
   perinfo.chat:
     description: "Allows using @ symbols in chat."
+    default: true

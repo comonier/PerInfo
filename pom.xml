@@ -6,11 +6,11 @@
 
     <groupId>com.comonier.perinfo</groupId>
     <artifactId>PerInfo</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version> <!-- Sugiro 21 para maior compatibilidade, mas pode manter 25 se preferir -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -22,27 +22,11 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>25</source>
-                    <target>25</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
-            <!-- Plugin para embutir as dependencias no JAR -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- REMOVEMOS O SHADE PLUGIN PARA O JAR FICAR LEVE -->
         </plugins>
     </build>
 
@@ -68,7 +52,7 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
-            <scope>compile</scope> <!-- Mudado para compile para o Shade embutir -->
+            <scope>provided</scope> <!-- VOLTAMOS PARA PROVIDED -->
         </dependency>
     </dependencies>
 </project>
