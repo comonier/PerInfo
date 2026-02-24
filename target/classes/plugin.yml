@@ -1,0 +1,26 @@
+name: PerInfo
+version: '1.0'
+main: com.comonier.perinfo.PerInfo
+api-version: '1.21'
+description: Utility for permissions, item inspection, and chat symbols.
+author: Comonier
+softdepend: [Vault]
+
+commands:
+  perinfo:
+    description: "Main command, shows plugin info and developers."
+    usage: "/perinfo <command|list|reload>"
+  iinfo:
+    description: "Shows technical details of the item in hand."
+    usage: "/iinfo"
+  simbolos:
+    description: "Shows a tutorial for using @ symbols in chat."
+    usage: "/simbolos"
+
+permissions:
+  perinfo.use:
+    description: "Allows searching for command permissions."
+  perinfo.iinfo:
+    description: "Allows detailed item inspection."
+  perinfo.chat:
+    description: "Allows using @ symbols in chat."

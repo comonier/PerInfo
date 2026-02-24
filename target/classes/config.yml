@@ -1,0 +1,26 @@
+# PerInfo v1.0 Configuration
+# Developed by Comonier
+
+# Language: en, pt
+language: en
+
+# --- COMMAND SETTINGS ---
+# Options for 'permission-mode':
+# - default: Everyone can use the command (no permission required).
+# - true: Only players with the specific permission node can use it.
+
+commands:
+  perinfo:
+    # Permission node: perinfo.use
+    permission-mode: default
+  iinfo:
+    # Permission node: perinfo.iinfo
+    permission-mode: default
+  chat-symbols:
+    # Permission node: perinfo.chat
+    # This controls @hand, @inv, @ec, @money, @playtime
+    permission-mode: default
+
+# Instructions:
+# If you set a mode to 'true', you must add the permission node 
+# to your group using a plugin like LuckPerms.
