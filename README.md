@@ -1,42 +1,60 @@
-🛡️ PerInfo v1.2
+# 🛡️ PerInfo v1.2
 
-Advanced Permission Lookup, Item Inspection, and Interactive Chat Symbols.
+**Advanced Permission Lookup, Item Inspection, and Interactive Chat Symbols.**
 
-PerInfo is a lightweight but powerful utility plugin for Spigot/Paper servers (optimized for 1.21+) that allows players to share items, inventories, and statistics in chat with full interactive support (Click & Hover), even on servers with aggressive chat management like VentureChat.
+O **PerInfo** é um utilitário leve e poderoso para servidores Spigot/Paper (otimizado para 1.21+) que permite aos jogadores compartilhar itens, inventários e estatísticas no chat com suporte interativo total (Click & Hover), mesmo em servidores com gerenciamento de chat agressivo, como o VentureChat.
 
-🚀 Key Features
+---
 
-Independent Chat Engine: Overrides modern chat plugins to ensure [hand], [inv], and [ec] always work with Click/Hover events.
+## 🚀 Principais Funcionalidades
 
-Interactive Symbols:
+*   **Motor de Chat Independente:** Sobrescreve plugins de chat modernos para garantir que tags como `[hand]`, `[inv]` e `[ec]` sempre funcionem com eventos de Clique/Hover.
+*   **Símbolos Interativos:**
+    *   `[hand]`: Mostra o item na mão com hover detalhado (Lore & Enchants) e informações técnicas ao clicar.
+    *   `[inv]`: Botão interativo para visualizar o inventário do jogador.
+    *   `[ec]`: Botão interativo para visualizar o Ender Chest do jogador.
+    *   `[money]` & `[playtime]`: Injeção de estatísticas em tempo real.
+*   **Busca de Permissões e Plugins:** Descubra instantaneamente qual plugin possui um comando e copie a permissão necessária com um clique.
+*   **Inspeção Técnica:** Comando `/iinfo` para visualizar IDs, dados NBT e Custom Model Data.
 
-[hand]: Shows item in hand with a detailed hover (Lore & Enchants) and technical info on click.
-[inv]: Interactive button to view player's inventory.
-[ec]: Interactive button to view player's Ender Chest.
-[money] & [playtime]: Real-time stats injection.
-Permission & Plugin Lookup: Instantly find which plugin owns a command and copy its permission node with one click.
-Technical Inspection: /iinfo command to see IDs, NBT data, and Custom Model Data.
+---
 
-🛠️ Technical Implementation
-Unlike older versions, v1.2 uses a Low-Priority Interceptor logic:
-Capture: It listens at EventPriority.LOWEST to grab the message before other plugins.
-Cancel: It cancels the original AsyncPlayerChatEvent to prevent duplicated or "plain-text" messages.
-Reconstruct: It rebuilds the entire message using the BungeeCord Chat API (JSON Components) to inject ClickEvent and HoverEvent that actually work on Minecraft 1.21.
-📋 Commands & Permissions
-Command	Description	Permission
-/perinfo <cmd>	Lookup plugin/permission for a command	perinfo.use
-/iinfo	 Show technical details of held item	perinfo.iinfo
-/per     List available chat symbols	perinfo.chat
-/perinfo reload	Reload config and messages	perinfo.admin
+## 🛠️ Implementação Técnica
 
-⚙️ Requirements
-Java 21
-Spigot/Paper 1.21+
-Vault (Optional, for [money] support)
+Diferente de versões anteriores, a v1.2 utiliza uma lógica de **Interceptação de Baixa Prioridade**:
 
-📦 Installation
-Download the PerInfo.jar from the Releases page.
-Drop it into your /plugins/ folder.
-Restart your server (recommended over /reload).
-Configure your language in config.yml.
-Developed with ☕ and persistence by Comonier.
+1.  **Captura:** Ouve em `EventPriority.LOWEST` para capturar a mensagem antes de outros plugins.
+2.  **Cancelamento:** Cancela o `AsyncPlayerChatEvent` original para evitar mensagens duplicadas ou em texto simples.
+3.  **Reconstrução:** Reconstrói a mensagem completa usando a **BungeeCord Chat API (JSON Components)** para injetar `ClickEvent` e `HoverEvent` funcionais no Minecraft 1.21.
+
+---
+
+## 📋 Comandos e Permissões
+
+
+| Comando | Descrição | Permissão |
+| :--- | :--- | :--- |
+| `/perinfo <cmd>` | Busca plugin/permissão de um comando | `perinfo.use` |
+| `/iinfo` | Mostra detalhes técnicos do item na mão | `perinfo.iinfo` |
+| `/per` | Lista os símbolos de chat disponíveis | `perinfo.chat` |
+| `/perinfo reload` | Recarrega a config e as mensagens | `perinfo.admin` |
+
+---
+
+## ⚙️ Requisitos
+
+*   **Java 21**
+*   **Spigot/Paper 1.21+**
+*   **Vault** (Opcional, necessário para suporte ao `[money]`)
+
+---
+
+## 📦 Instalação
+
+1.  Baixe o `PerInfo.jar` na página de Releases.
+2.  Coloque-o na sua pasta `/plugins/`.
+3.  Reinicie seu servidor (recomendado em vez de `/reload`).
+4.  Configure seu idioma no arquivo `config.yml`.
+
+---
+Desenvolvido com ☕ e persistência por **Comonier**.
