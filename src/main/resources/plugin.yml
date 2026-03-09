@@ -21,6 +21,9 @@ commands:
     permission: perinfo.iinfo
 
 permissions:
+  perinfo.admin: 
+    description: "Use /reload command"
+    default: op
   perinfo.use:
     description: "Use /perinfo, /per Command list."
     default: true
