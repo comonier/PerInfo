@@ -25,17 +25,17 @@ public class PerInfoCommand implements CommandExecutor, TabCompleter, Listener {
 
         // --- COMANDO UNIFICADO: /per ---
         if (n.equals("per")) {
-            s.sendMessage("§b§lPerInfo v1.2 §7- Guia de Comandos");
-            s.sendMessage("§e/per <comando> §7- Busca plugin/permissão");
-            s.sendMessage("§e/iinfo §7- Ver detalhes técnicos do item");
-            s.sendMessage("§e/per reload §7- Recarregar plugin");
+            s.sendMessage("§b§lPerInfo v1.2 §7- Command List");
+            s.sendMessage("§e/perinfo <cmd> §7- Plugin/permission");
+            s.sendMessage("§e/iinfo §7- ID item must to be on hand");
+            s.sendMessage("§e/perinfo reload §7- Reload plugin");
             s.sendMessage("");
-            s.sendMessage("§b§lSímbolos no Chat (Clique/Hover):");
-            s.sendMessage("§f[hand] §7- Mostra o item na mão");
-            s.sendMessage("§f[INV] §7- Botão para ver seu Inventário");
-            s.sendMessage("§f[EC] §7- Botão para ver seu EnderChest");
-            s.sendMessage("§f[money] §7- Mostra seu saldo atual");
-            s.sendMessage("§f[playtime] §7- Mostra seu tempo de jogo");
+            s.sendMessage("§b§lChat Link: (Clique/Hover):");
+            s.sendMessage("§f[hand] §7- Link Item on Hand");
+            s.sendMessage("§f[inv] §7- Link Inventory");
+            s.sendMessage("§f[ec] §7- Link EnderChest");
+            s.sendMessage("§f[money] §7- Link Money");
+            s.sendMessage("§f[playtime] §7- Link PlayedTime");
             return true;
         }
 

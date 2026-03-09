@@ -34,7 +34,7 @@ public class ChatListener implements Listener {
             e.setCancelled(true);
             
             TextComponent message = new TextComponent("");
-            message.addExtra(new TextComponent("§7[§bPerInfo§7] §f" + p.getDisplayName() + " §8➜ §f"));
+            message.addExtra(new TextComponent("§0[§aPI§0] §f" + p.getDisplayName() + " §9➜ §f"));
 
             String[] words = m.split(" ");
             for (int i = 0; i < words.length; i++) {
@@ -52,12 +52,12 @@ public class ChatListener implements Listener {
                 else if (word.equalsIgnoreCase("[inv]")) {
                     part = new TextComponent("§b[INV]");
                     part.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/perinfo viewinv " + p.getName()));
-                    part.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§bClique para abrir o inventário")));
+                    part.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§6[INV]")));
                 } 
                 else if (word.equalsIgnoreCase("[ec]")) {
                     part = new TextComponent("§5[EC]");
                     part.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/perinfo viewec " + p.getName()));
-                    part.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§dClique para abrir o EnderChest")));
+                    part.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§5[EC]")));
                 } 
                 else if (word.equalsIgnoreCase("[money]")) {
                     String val = (plugin.getEcon() != null) ? String.format("%.2f", plugin.getEcon().getBalance(p)) : "0.00";
@@ -81,7 +81,7 @@ public class ChatListener implements Listener {
 
     // Pega apenas o nome colorido para o chat
     private String getHandNameOnly(ItemStack i) {
-        if (i == null || i.getType() == Material.AIR) return "§b[Mão Vazia]";
+        if (i == null || i.getType() == Material.AIR) return "§b[empty]";
         ItemMeta meta = i.getItemMeta();
         String name = (meta != null && meta.hasDisplayName()) ? meta.getDisplayName() : i.getType().name().replace("_", " ").toLowerCase();
         return "§b[" + name + "§b]§r";
@@ -89,7 +89,7 @@ public class ChatListener implements Listener {
 
     // Monta o texto do Hover (Lore + Encantos)
     private String getItemHover(ItemStack i) {
-        if (i == null || i.getType() == Material.AIR) return "§cNada na mão";
+        if (i == null || i.getType() == Material.AIR) return "§cEmpty Hand";
         
         StringBuilder sb = new StringBuilder();
         ItemMeta meta = i.getItemMeta();
@@ -114,7 +114,7 @@ public class ChatListener implements Listener {
             }
         }
         
-        sb.append("\n§b§l» §fClique para detalhes técnicos");
+        sb.append("\n§b§l» §fClick to show details");
         return sb.toString();
     }
 }

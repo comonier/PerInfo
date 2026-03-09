@@ -9,24 +9,24 @@ softdepend: [Vault, VentureChat, EssentialsChat, LPC]
 
 commands:
   per:
-    description: "Guia de comandos e símbolos do PerInfo."
+    description: "PerInfo Tutorial."
     usage: "/per"
   perinfo:
-    description: "Comando principal para lookup de plugins e comandos internos."
+    description: "Main Command."
     usage: "/perinfo <comando|reload>"
     permission: perinfo.use
   iinfo:
-    description: "Mostra detalhes técnicos do item na mão."
+    description: "Show Item ID"
     usage: "/iinfo"
     permission: perinfo.iinfo
 
 permissions:
   perinfo.use:
-    description: "Permite usar o lookup de comandos."
-    default: op
+    description: "Use /perinfo, /per Command list."
+    default: true
   perinfo.iinfo:
-    description: "Permite inspecionar itens."
-    default: op
+    description: "Use /iinfo command Item ID."
+    default: true
   perinfo.chat:
-    description: "Permite usar os símbolos [hand], [INV], [EC], etc."
+    description: "Link permission [hand], [INV], [EC], etc."
     default: true
