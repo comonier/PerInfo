@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org"
+         xmlns:xsi="http://www.w3.org"
+         xsi:schemaLocation="http://maven.apache.org http://maven.apache.org">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.comonier.perinfo</groupId>
     <artifactId>PerInfo</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>21</java.version> <!-- Sugiro 21 para maior compatibilidade, mas pode manter 25 se preferir -->
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -24,20 +24,20 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
-            <!-- REMOVEMOS O SHADE PLUGIN PARA O JAR FICAR LEVE -->
         </plugins>
     </build>
 
     <repositories>
         <repository>
             <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <url>https://hub.spigotmc.org</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
-            <url>https://jitpack.io/</url>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -52,7 +52,7 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
-            <scope>provided</scope> <!-- VOLTAMOS PARA PROVIDED -->
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -9,12 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.util.StringUtil;
 import java.util.*;
 
@@ -24,66 +21,58 @@ public class PerInfoCommand implements CommandExecutor, TabCompleter, Listener {
 
     @Override
     public boolean onCommand(CommandSender s, Command c, String l, String[] args) {
-        String cmdName = c.getName().toLowerCase();
+        String n = c.getName().toLowerCase();
 
-        if (cmdName.equals("iinfo")) {
-            if (s instanceof Player p) {
-                if (plugin.hasPerm(p, "iinfo", "perinfo.iinfo") == false) {
-                    p.sendMessage(plugin.getMsg("no-permission"));
-                    return true;
-                }
-                ItemStack item = p.getInventory().getItemInMainHand();
-                if (item.getType() == Material.AIR) {
-                    p.sendMessage(plugin.getMsg("item-empty"));
-                    return true;
-                }
-                p.sendMessage(plugin.getMsg("item-info-header"));
-                p.sendMessage(plugin.getMsg("item-id").replace("{id}", item.getType().name()));
-                if (item.getItemMeta() != null) {
-                    if (item.getItemMeta().hasCustomModelData()) {
-                        p.sendMessage(plugin.getMsg("item-model").replace("{data}", String.valueOf(item.getItemMeta().getCustomModelData())));
-                    }
-                }
-            }
+        // --- COMANDO UNIFICADO: /per ---
+        if (n.equals("per")) {
+            s.sendMessage("§b§lPerInfo v1.2 §7- Guia de Comandos");
+            s.sendMessage("§e/per <comando> §7- Busca plugin/permissão");
+            s.sendMessage("§e/iinfo §7- Ver detalhes técnicos do item");
+            s.sendMessage("§e/per reload §7- Recarregar plugin");
+            s.sendMessage("");
+            s.sendMessage("§b§lSímbolos no Chat (Clique/Hover):");
+            s.sendMessage("§f[hand] §7- Mostra o item na mão");
+            s.sendMessage("§f[INV] §7- Botão para ver seu Inventário");
+            s.sendMessage("§f[EC] §7- Botão para ver seu EnderChest");
+            s.sendMessage("§f[money] §7- Mostra seu saldo atual");
+            s.sendMessage("§f[playtime] §7- Mostra seu tempo de jogo");
             return true;
         }
 
-        if (cmdName.equals("simbolos")) {
-            s.sendMessage(plugin.getMsg("symbols-title"));
-            String[] syms = {"[hand]", "[inv]", "[ec]", "[money]", "[playtime]"};
-            String[] keys = {"symbol-hand", "symbol-inv", "symbol-ec", "symbol-money", "symbol-playtime"};
-            int i = 0;
-            while (i != syms.length) {
-                s.sendMessage(plugin.getMsg("symbols-line").replace("{symbol}", syms[i]).replace("{desc}", plugin.getMsg(keys[i])));
-                i++;
-            }
-            return true;
-        }
-
-        if (cmdName.equals("perinfo")) {
-            if (args.length == 0) {
-                s.sendMessage("§bPerInfo v1.1 §7- Use /perinfo [comando]");
+        if (n.equals("iinfo") && s instanceof Player) {
+            Player p = (Player) s;
+            ItemStack i = p.getInventory().getItemInMainHand();
+            if (i.getType() == Material.AIR) {
+                p.sendMessage(plugin.getMsg("item-empty"));
                 return true;
             }
+            p.sendMessage(plugin.getMsg("item-info-header"));
+            p.sendMessage(plugin.getMsg("item-id").replace("{id}", i.getType().name()));
+            if (i.hasItemMeta() && i.getItemMeta().hasCustomModelData()) {
+                p.sendMessage(plugin.getMsg("item-model").replace("{data}", String.valueOf(i.getItemMeta().getCustomModelData())));
+            }
+            return true;
+        }
+
+        if (n.equals("perinfo")) {
+            if (args.length == 0) {
+                return Bukkit.dispatchCommand(s, "per");
+            }
             String sub = args[0].toLowerCase();
+
+            if (sub.equals("viewec") && args.length > 1 && s instanceof Player) {
+                Player t = Bukkit.getPlayer(args[1]);
+                if (t != null) ((Player) s).openInventory(t.getEnderChest());
+                return true;
+            }
+            if (sub.equals("viewinv") && args.length > 1 && s instanceof Player) {
+                Player t = Bukkit.getPlayer(args[1]);
+                if (t != null) ((Player) s).openInventory(t.getInventory());
+                return true;
+            }
             if (sub.equals("reload")) {
                 plugin.loadMessages();
                 s.sendMessage(plugin.getMsg("reload-success"));
-                return true;
-            }
-            if (sub.equals("list")) {
-                if (args.length >= 2) {
-                    Plugin t = Bukkit.getPluginManager().getPlugin(args[1]);
-                    if (t != null) {
-                        s.sendMessage(plugin.getMsg("list-header").replace("{plugin}", t.getName()));
-                        if (t.getDescription().getCommands() != null) {
-                            t.getDescription().getCommands().forEach((k, v) -> {
-                                Object pObj = ((Map) v).get("permission");
-                                if (s instanceof Player p) sendClick(p, "§e/" + k + " §f- ", (pObj != null ? pObj.toString() : "N/A"));
-                            });
-                        }
-                    }
-                }
                 return true;
             }
             handleLookup(s, args[0]);
@@ -92,16 +81,18 @@ public class PerInfoCommand implements CommandExecutor, TabCompleter, Listener {
     }
 
     private void handleLookup(CommandSender s, String name) {
-        PluginCommand pc = Bukkit.getPluginCommand(name.replace("/", ""));
+        String clean = name.replace("/", "");
+        PluginCommand pc = Bukkit.getPluginCommand(clean);
         if (pc != null) {
             s.sendMessage(plugin.getMsg("plugin-info").replace("{plugin}", pc.getPlugin().getName()));
             s.sendMessage(plugin.getMsg("version-info").replace("{version}", pc.getPlugin().getDescription().getVersion()));
-            String perm = pc.getPermission();
-            if (perm == null) perm = plugin.getMsg("not-defined");
-            if (s instanceof Player p) sendClick(p, plugin.getMsg("perm-info"), perm);
+            String pr = pc.getPermission() != null ? pc.getPermission() : plugin.getMsg("not-defined");
+            if (s instanceof Player) sendClick((Player) s, plugin.getMsg("perm-info"), pr);
+            else s.sendMessage(plugin.getMsg("perm-info") + pr);
         } else {
             HelpTopic t = Bukkit.getHelpMap().getHelpTopic(name.startsWith("/") ? name : "/" + name);
             if (t != null) s.sendMessage("§eComando: §f" + t.getName() + " §7| §f" + t.getShortText());
+            else s.sendMessage(plugin.getMsg("command-not-found").replace("{name}", name));
         }
     }
 
@@ -115,15 +106,9 @@ public class PerInfoCommand implements CommandExecutor, TabCompleter, Listener {
         p.spigot().sendMessage(msg);
     }
 
-    @EventHandler
-    public void onInvClick(InventoryClickEvent e) {
-        if (e.getView().getTitle().contains("Inv: ")) e.setCancelled(true);
-        if (e.getView().getTitle().contains("Ender: ")) e.setCancelled(true);
-    }
-
     @Override
-    public List onTabComplete(CommandSender s, Command c, String a, String[] args) {
-        if (args.length == 1) return StringUtil.copyPartialMatches(args[0], Arrays.asList("list", "reload"), new ArrayList());
-        return new ArrayList();
+    public List<String> onTabComplete(CommandSender s, Command c, String a, String[] args) {
+        if (args.length == 1) return StringUtil.copyPartialMatches(args[0], Arrays.asList("reload", "iinfo"), new ArrayList<>());
+        return new ArrayList<>();
     }
 }
