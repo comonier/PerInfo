@@ -1,1 +1,3 @@
 com\comonier\perinfo\PerInfo.class
+com\comonier\perinfo\PerInfoCommand.class
+com\comonier\perinfo\ChatListener.class

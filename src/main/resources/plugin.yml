@@ -4,7 +4,6 @@ main: com.comonier.perinfo.PerInfo
 api-version: '1.21'
 description: Utility for permissions, item inspection, and chat symbols.
 author: Comonier
-# Garantindo que o VentureChat não sobre-escreva as permissões
 softdepend: [Vault, VentureChat]
 
 commands:
@@ -15,7 +14,7 @@ commands:
     description: "Shows technical details of the item in hand."
     usage: "/iinfo"
   simbolos:
-    description: "Tutorial for using @ symbols in chat."
+    description: "Tutorial for using [] symbols in chat."
     usage: "/simbolos"
 
 permissions:
@@ -26,5 +25,5 @@ permissions:
     description: "Allows item inspection."
     default: op
   perinfo.chat:
-    description: "Allows using @ symbols in chat."
+    description: "Allows using [] symbols in chat."
     default: true

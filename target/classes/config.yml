@@ -1,4 +1,4 @@
-# PerInfo v1.0 Configuration
+# PerInfo v1.1 Configuration
 # Developed by Comonier
 
 # Language: en, pt
@@ -18,7 +18,7 @@ commands:
     permission-mode: default
   chat-symbols:
     # Permission node: perinfo.chat
-    # This controls @hand, @inv, @ec, @money, @playtime
+    # This controls [hand], [inv], [ec], [money], [playtime]
     permission-mode: default
 
 # Instructions:
